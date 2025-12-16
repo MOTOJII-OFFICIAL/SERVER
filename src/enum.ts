@@ -28,3 +28,9 @@ export enum OtpType {
     USER = 'user',
     REGISTER = 'register',
 }
+
+export enum AddressType {
+    HOME = 'HOME',
+    WORK = 'WORK',
+    OTHER = 'OTHER',
+}

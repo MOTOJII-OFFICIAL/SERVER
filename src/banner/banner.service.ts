@@ -14,7 +14,7 @@ export class BannerService {
 
   async create(image: string, dto: BannerDto) {
     const obj = Object.assign({
-      image: process.env.RN_CDN_LINK + image,
+      image: process.env.mj_CDN_LINK + image,
       imagePath: image,
       status: dto.status
     });
