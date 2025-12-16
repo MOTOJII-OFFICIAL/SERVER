@@ -14,6 +14,7 @@ import { CityModule } from './city/city.module';
 import { StateModule } from './state/state.module';
 import { CountryModule } from './country/country.module';
 import { AddressModule } from './address/address.module';
+import { UserAdditionalDetailsModule } from './user-additional-details/user-additional-details.module';
 dotenv.config();
 
 @Module({
@@ -39,7 +40,8 @@ dotenv.config();
     CityModule,
     StateModule,
     CountryModule,
-    AddressModule
+    AddressModule,
+    UserAdditionalDetailsModule
 
   ],
   controllers: [AppController],
