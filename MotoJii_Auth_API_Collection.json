@@ -1,0 +1,768 @@
+{
+	"info": {
+		"_postman_id": "9c821c4e-3065-498a-85d3-77efa81f3bcb",
+		"name": "MotoJii Auth APIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36822091"
+	},
+	"item": [
+		{
+			"name": "ADMIN",
+			"item": [
+				{
+					"name": "Send Admin OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"admin@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/admin/send-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "admin", "send-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"admin@example.com\",\n    \"otp\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/admin/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "admin", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "USER",
+			"item": [
+				{
+					"name": "Send User OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"user@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/send-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "send-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"user@example.com\",\n    \"otp\": \"123456\",\n    \"role\": \"USER\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MECHANIC",
+			"item": [
+				{
+					"name": "Send Mechanic OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"mechanic@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/send-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "send-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mechanic Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"mechanic@example.com\",\n    \"otp\": \"123456\",\n    \"role\": \"MECHANIC\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "VENDOR",
+			"item": [
+				{
+					"name": "Send Vendor OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"vendor@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/send-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "send-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vendor Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"vendor@example.com\",\n    \"otp\": \"123456\",\n    \"role\": \"VENDOR\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TOWING_PROVIDER",
+			"item": [
+				{
+					"name": "Send Towing Provider OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"towing@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/send-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "send-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Towing Provider Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"towing@example.com\",\n    \"otp\": \"123456\",\n    \"role\": \"TOWING_PROVIDER\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CAR_DETAILER",
+			"item": [
+				{
+					"name": "Send Car Detailer OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"detailer@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/send-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "send-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Car Detailer Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"detailer@example.com\",\n    \"otp\": \"123456\",\n    \"role\": \"CAR_DETAILER\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/user/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "user", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "REGISTRATION",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"newuser@example.com\",\n    \"phoneNumber\": \"1234567890\",\n    \"name\": \"John Doe\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/register",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"newuser@example.com\",\n    \"otp\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/verify-registration",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "verify-registration"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RESEND OTP",
+			"item": [
+				{
+					"name": "Resend Admin OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"admin@example.com\",\n    \"type\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/resend-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "resend-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend User OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"user@example.com\",\n    \"type\": \"user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/resend-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "resend-otp"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Registration OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loginId\": \"newuser@example.com\",\n    \"type\": \"register\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/resend-otp",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "resend-otp"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TOKEN MANAGEMENT",
+			"item": [
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"your_refresh_token_here\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/refresh-token",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "refresh-token"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"your_refresh_token_here\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/auth/logout",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "auth", "logout"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "BANNER",
+			"item": [
+				{
+					"name": "Create Banner",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "status",
+									"value": "ACTIVE",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/banner",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "banner"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Banners (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5892/api/v1/banner/admin?status=ACTIVE&limit=10&offset=0",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "banner", "admin"],
+							"query": [
+								{
+									"key": "status",
+									"value": "ACTIVE"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Banners (User)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5892/api/v1/banner?limit=10&offset=0",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "banner"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Banner Image",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/banner/update-banner/{{bannerId}}",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "banner", "update-banner", "{{bannerId}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Banner Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"INACTIVE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5892/api/v1/banner/status/{{bannerId}}",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5892",
+							"path": ["api", "v1", "banner", "status", "{{bannerId}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

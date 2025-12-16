@@ -1,0 +1,26 @@
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AuthService } from '../auth.service';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(private readonly authService: AuthService) {
+    const secret = process.env.MG_JWT_SECRET;
+    if (!secret) {
+      throw new Error('MG_JWT_SECRET environment variable is required');
+    }
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: secret,
+    });
+  }
+
+  async validate(payload) {
+    const user = await this.authService.validate(payload.id);
+    if (!user) {
+      throw new UnauthorizedException('Authentication failed.');
+    }
+    return user;
+  }
+}
