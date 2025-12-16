@@ -11,8 +11,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cache } from 'cache-manager';
 import { Account } from 'src/account/entities/account.entity';
 import { UserPermission } from 'src/user-permissions/entities/user-permission.entity';
+import { Session } from './entities/session.entity';
 import { UserRole, OtpType } from 'src/enum';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +22,7 @@ export class AuthService {
     private jwtService: JwtService,
     @InjectRepository(Account) private readonly repo: Repository<Account>,
     @InjectRepository(UserPermission) private readonly upRepo: Repository<UserPermission>,
+    @InjectRepository(Session) private readonly sessionRepo: Repository<Session>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -28,20 +31,30 @@ export class AuthService {
     const otp = this.generateOtp();
     
     await this.cacheManager.set(`admin_otp_${admin.id}`, otp, 15 * 60 * 1000);
-    console.log(`Admin OTP for ${loginId}: ${otp}`);
+    await this.cacheManager.del(`admin_otp_attempts_${admin.id}`); // Reset attempts on new OTP
+    // TODO: Send OTP via SMS/Email instead of console
     
     return { message: 'OTP sent successfully' };
   }
 
   async adminLogin(loginId: string, otp: string) {
     const admin = await this.findUserByLoginId(loginId, UserRole.ADMIN);
+    const attemptKey = `admin_otp_attempts_${admin.id}`;
+    const attempts = await this.cacheManager.get<number>(attemptKey) || 0;
+    
+    if (attempts >= 3) {
+      throw new BadRequestException('Too many OTP attempts. Request new OTP.');
+    }
+    
     const cachedOtp = await this.cacheManager.get(`admin_otp_${admin.id}`);
     
     if (cachedOtp !== otp) {
-      throw new BadRequestException('Invalid or expired OTP');
+      await this.cacheManager.set(attemptKey, attempts + 1, 15 * 60 * 1000);
+      throw new BadRequestException(`Invalid OTP. ${2 - attempts} attempts remaining.`);
     }
     
     await this.cacheManager.del(`admin_otp_${admin.id}`);
+    await this.cacheManager.del(attemptKey);
     const tokens = await this.generateTokens(admin.id);
     
     return { ...tokens, user: admin };
@@ -52,20 +65,30 @@ export class AuthService {
     const otp = this.generateOtp();
     
     await this.cacheManager.set(`user_otp_${user.id}`, otp, 15 * 60 * 1000);
-    console.log(`User OTP for ${loginId}: ${otp}`);
+    await this.cacheManager.del(`user_otp_attempts_${user.id}`); // Reset attempts on new OTP
+    // TODO: Send OTP via SMS/Email instead of console
     
     return { message: 'OTP sent successfully' };
   }
 
   async userLogin(loginId: string, otp: string, role: UserRole) {
     const user = await this.findUserByLoginId(loginId, role);
+    const attemptKey = `user_otp_attempts_${user.id}`;
+    const attempts = await this.cacheManager.get<number>(attemptKey) || 0;
+    
+    if (attempts >= 3) {
+      throw new BadRequestException('Too many OTP attempts. Request new OTP.');
+    }
+    
     const cachedOtp = await this.cacheManager.get(`user_otp_${user.id}`);
     
     if (cachedOtp !== otp) {
-      throw new BadRequestException('Invalid or expired OTP');
+      await this.cacheManager.set(attemptKey, attempts + 1, 15 * 60 * 1000);
+      throw new BadRequestException(`Invalid OTP. ${2 - attempts} attempts remaining.`);
     }
     
     await this.cacheManager.del(`user_otp_${user.id}`);
+    await this.cacheManager.del(attemptKey);
     const tokens = await this.generateTokens(user.id);
     
     return { ...tokens, user };
@@ -84,18 +107,28 @@ export class AuthService {
       throw new BadRequestException('User already exists');
     }
     
+    const hashedPassword = await bcrypt.hash(password, 12);
     const otp = this.generateOtp();
-    await this.cacheManager.set(`register_otp_${email}`, { otp, email, phoneNumber, name, password }, 15 * 60 * 1000);
+    await this.cacheManager.set(`register_otp_${email}`, { otp, email, phoneNumber, name, password: hashedPassword }, 15 * 60 * 1000);
     console.log(`Registration OTP for ${email}: ${otp}`);
+    
     
     return { message: 'OTP sent for registration verification' };
   }
 
   async verifyRegistrationOtp(loginId: string, otp: string) {
+    const attemptKey = `register_otp_attempts_${loginId}`;
+    const attempts = await this.cacheManager.get<number>(attemptKey) || 0;
+    
+    if (attempts >= 3) {
+      throw new BadRequestException('Too many OTP attempts. Start registration again.');
+    }
+    
     const cachedData = await this.cacheManager.get<any>(`register_otp_${loginId}`);
     
     if (!cachedData || cachedData.otp !== otp) {
-      throw new BadRequestException('Invalid or expired OTP');
+      await this.cacheManager.set(attemptKey, attempts + 1, 15 * 60 * 1000);
+      throw new BadRequestException(`Invalid OTP. ${2 - attempts} attempts remaining.`);
     }
     
     const user = this.repo.create({
@@ -108,6 +141,7 @@ export class AuthService {
     
     await this.repo.save(user);
     await this.cacheManager.del(`register_otp_${loginId}`);
+    await this.cacheManager.del(attemptKey);
     
     const tokens = await this.generateTokens(user.id);
     return { ...tokens, user, message: 'Registration completed successfully' };
@@ -142,16 +176,33 @@ export class AuthService {
   }
 
   async validate(id: string): Promise<Account> {
-    return this.findUserByLoginId(id);
+    const user = await this.repo.findOne({ where: { id } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
   }
 
   async refreshToken(refreshToken: string) {
     try {
+      const session = await this.sessionRepo.findOne({
+        where: { refreshToken, isActive: true }
+      });
+      
+      if (!session || session.refreshExpiresAt < new Date()) {
+        throw new UnauthorizedException('Invalid or expired refresh token');
+      }
+
       const payload = this.jwtService.verify(refreshToken);
       if (payload.type !== 'refresh') {
         throw new UnauthorizedException('Invalid token type');
       }
       
+      // Deactivate old session
+      session.isActive = false;
+      await this.sessionRepo.save(session);
+      
+      // Generate new token pair
       const tokens = await this.generateTokens(payload.id);
       return tokens;
     } catch {
@@ -160,7 +211,10 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    await this.cacheManager.set(`blacklist_${refreshToken}`, true, 7 * 24 * 60 * 60 * 1000);
+    await this.sessionRepo.update(
+      { refreshToken },
+      { isActive: false }
+    );
     return { message: 'Logged out successfully' };
   }
 
@@ -171,7 +225,15 @@ export class AuthService {
     });
   }
 
+
+
   private async generateTokens(userId: string) {
+    // Cleanup old sessions for this user
+    await this.sessionRepo.update(
+      { accountId: userId, isActive: true },
+      { isActive: false }
+    );
+    
     const accessToken = this.jwtService.sign(
       { id: userId, type: 'access' },
       { expiresIn: '15m' }
@@ -181,6 +243,18 @@ export class AuthService {
       { id: userId, type: 'refresh' },
       { expiresIn: '7d' }
     );
+    
+    // Store session in database
+    const session = this.sessionRepo.create({
+      token: accessToken,
+      refreshToken,
+      accountId: userId,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      refreshExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      isActive: true
+    });
+    
+    await this.sessionRepo.save(session);
     
     return {
       accessToken,

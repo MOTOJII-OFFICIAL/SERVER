@@ -31,6 +31,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.enableCors();
+
   const port = 5892;
   const apiPrefix = 'api/v1';
   await app.listen(port);

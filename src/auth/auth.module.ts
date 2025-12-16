@@ -18,11 +18,12 @@ import { CaslAbilityFactory } from './factory/casl-ability.factory';
     TypeOrmModule.forFeature([Account, UserPermission, Session]),
     PassportModule,
     CacheModule.register(),
-    JwtModule.register({
-      secret: process.env.MG_JWT_SECRET || 'default-secret',
-      signOptions: { expiresIn: '24h' },
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.MJ_JWT_SECRET || 'default-secret',
+        signOptions: { expiresIn: '24h' },
+      }),
     }),
-
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, CaslAbilityFactory],
