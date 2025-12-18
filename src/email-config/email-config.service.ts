@@ -17,19 +17,6 @@ export class EmailConfigService {
       where: { status: DefaultStatus.ACTIVE },
     });
 
-    if (!config) {
-      config = this.emailConfigRepo.create({
-        smtpHost: 'smtp.gmail.com',
-        smtpPort: 587,
-        smtpUsername: 'motojii.official@gmail.com',
-        smtpPassword: 'lsdm fklu mjir qzng',
-        fromName: 'MOTOJII',
-        fromEmail: 'motojii.official@gmail.com',
-        useSSL: false,
-      });
-      config = await this.emailConfigRepo.save(config);
-    }
-
     return config;
   }
 
