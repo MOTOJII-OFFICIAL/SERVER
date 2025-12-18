@@ -3,13 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, Brackets } from 'typeorm';
 import { Account } from './entities/account.entity';
 import { Address } from 'src/address/entities/address.entity';
+import { ServiceRequest } from 'src/service-request/entities/service-request.entity';
+import { UserAdditionalDetail } from 'src/user-additional-details/entities/user-additional-detail.entity';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CreateUserAddressDto } from 'src/address/dto/create-user-address.dto';
-import { UserRole, DefaultStatus } from 'src/enum';
+import { UserRole, DefaultStatus, WorkingStatus, RequestStatus } from 'src/enum';
+import { join } from 'path';
+import { unlink } from 'fs/promises';
 
 @Injectable()
 export class AccountService {
@@ -18,11 +22,30 @@ export class AccountService {
     private accountRepository: Repository<Account>,
     @InjectRepository(Address)
     private addressRepository: Repository<Address>,
+    @InjectRepository(ServiceRequest)
+    private serviceRequestRepository: Repository<ServiceRequest>,
+    @InjectRepository(UserAdditionalDetail)
+    private userAdditionalDetailRepository: Repository<UserAdditionalDetail>,
   ) {}
 
   async create(createAccountDto: CreateAccountDto) {
     const account = this.accountRepository.create(createAccountDto);
     return this.accountRepository.save(account);
+  }
+
+  async addUserAddress(userId: string, createAddressDto: CreateUserAddressDto) {
+    const user = await this.accountRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const address = this.addressRepository.create({
+      ...createAddressDto,
+      accountId: userId,
+      createdBy: userId
+    });
+
+    return this.addressRepository.save(address);
   }
 
   async getUsers(query: GetUsersQueryDto) {
@@ -118,14 +141,28 @@ export class AccountService {
     return user;
   }
 
-  async deleteUser(id: string, currentUserId: string) {
-    const user = await this.accountRepository.findOne({ where: { id } });
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    const user = await this.accountRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    user.status = DefaultStatus.DELETED;
-    user.updatedBy = currentUserId;
+    Object.assign(user, updateProfileDto);
+    user.updatedBy = userId;
+    return this.accountRepository.save(user);
+  }
+
+  async updateImage(imagePath: string, user: Account) {
+    if (user.profileImg) {
+      const oldPath = join(__dirname, '..', '..', user.profileImg);
+      try {
+        await unlink(oldPath);
+      } catch (err) {
+        console.warn(`Failed to delete old image: ${oldPath}`, err.message);
+      }
+    }
+    user.profileImg = imagePath;
+    user.profileUrl = process.env.MJ_CDN_LINK + imagePath;
     return this.accountRepository.save(user);
   }
 
@@ -138,89 +175,6 @@ export class AccountService {
     user.status = updateStatusDto.status;
     user.updatedBy = currentUserId;
     return this.accountRepository.save(user);
-  }
-
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
-    const user = await this.accountRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    Object.assign(user, updateProfileDto);
-    user.updatedBy = userId;
-    return this.accountRepository.save(user);
-  }
-
-  async addUserAddress(userId: string, createAddressDto: CreateUserAddressDto) {
-    const user = await this.accountRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const address = this.addressRepository.create({
-      ...createAddressDto,
-      accountId: userId,
-      createdBy: userId
-    });
-
-    return this.addressRepository.save(address);
-  }
-
-  async updateImage(userId: string, imagePath: string) {
-    const user = await this.accountRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    user.profileImg = process.env.MJ_CDN_LINK + imagePath;
-    user.profileUrl = imagePath;
-    user.updatedBy = userId;
-    return this.accountRepository.save(user);
-  }
-
-  async findAll() {
-    const [result, count] = await this.accountRepository
-      .createQueryBuilder('account')
-      .select([
-        'account.id',
-        'account.name',
-        'account.email',
-        'account.phone',
-        'account.userRole',
-        'account.status',
-        'account.profileImg',
-        'account.profileUrl',
-        'account.createdAt',
-        'account.updatedAt'
-      ])
-      .where('account.status != :deletedStatus', { deletedStatus: DefaultStatus.DELETED })
-      .getManyAndCount();
-
-    return { result, count };
-  }
-
-  async findOne(id: string) {
-    const account = await this.accountRepository
-      .createQueryBuilder('account')
-      .select([
-        'account.id',
-        'account.name',
-        'account.email',
-        'account.phone',
-        'account.userRole',
-        'account.status',
-        'account.profileImg',
-        'account.profileUrl',
-        'account.createdAt',
-        'account.updatedAt'
-      ])
-      .where('account.id = :id', { id })
-      .getOne();
-
-    if (!account) {
-      throw new NotFoundException('Account not found');
-    }
-    return account;
   }
 
   async update(id: string, updateAccountDto: UpdateAccountDto) {
@@ -239,5 +193,36 @@ export class AccountService {
     }
     account.status = DefaultStatus.DELETED;
     return this.accountRepository.save(account);
+  }
+
+  async updateWorkingStatus(accountId: string, workingStatus: WorkingStatus) {
+    const details = await this.userAdditionalDetailRepository.findOne({ where: { accountId } });
+    if (!details) {
+      throw new NotFoundException('User details not found');
+    }
+    details.workingStatus = workingStatus;
+    details.updatedBy = accountId;
+    return this.userAdditionalDetailRepository.save(details);
+  }
+
+  async getProviderStats(providerId: string) {
+    const totalRequests = await this.serviceRequestRepository.count({ where: { providerId } });
+    const completedRequests = await this.serviceRequestRepository.count({ 
+      where: { providerId, requestStatus: RequestStatus.COMPLETED } 
+    });
+    
+    const earningsResult = await this.serviceRequestRepository
+      .createQueryBuilder('sr')
+      .select('SUM(sr.finalPrice)', 'totalEarnings')
+      .where('sr.providerId = :providerId', { providerId })
+      .andWhere('sr.requestStatus = :status', { status: RequestStatus.COMPLETED })
+      .getRawOne();
+    
+    return {
+      totalRequests,
+      completedRequests,
+      totalEarnings: parseFloat(earningsResult.totalEarnings) || 0,
+      completionRate: totalRequests > 0 ? (completedRequests / totalRequests) * 100 : 0,
+    };
   }
 }

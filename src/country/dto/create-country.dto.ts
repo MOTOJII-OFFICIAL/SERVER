@@ -12,6 +12,10 @@ export class CountryDto {
   code: string;
 
   @IsOptional()
+  @IsString()
+  phoneCode: string;
+
+  @IsOptional()
   @IsEnum(DefaultStatus)
   status: DefaultStatus;
 }
@@ -36,4 +40,4 @@ export class CountryPaginationDto {
   offset: number = 0;
 }
 
-export class CreateCountryDto extends CountryDto {}
+export class CreateCountryDto extends CountryDto { }

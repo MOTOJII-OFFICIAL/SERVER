@@ -8,6 +8,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { WorkingStatus } from 'src/enum';
+import { IsEnum } from 'class-validator';
+
+class UpdateWorkingStatusDto {
+  @IsEnum(WorkingStatus)
+  workingStatus: WorkingStatus;
+}
 
 @Controller('user-additional-details')
 @UseGuards(AuthGuard('jwt'))
@@ -27,6 +34,11 @@ export class UserAdditionalDetailsController {
   @Patch()
   update(@CurrentUser() user: Account, @Body() dto: UpdateUserAdditionalDetailDto) {
     return this.service.update(user.id, dto);
+  }
+
+  @Patch('working-status')
+  updateWorkingStatus(@CurrentUser() user: Account, @Body() dto: UpdateWorkingStatusDto) {
+    return this.service.updateWorkingStatus(user.id, dto.workingStatus);
   }
 
   @Delete()

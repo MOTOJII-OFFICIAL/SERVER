@@ -11,6 +11,8 @@ import { UserPermission } from 'src/user-permissions/entities/user-permission.en
 import { Session } from './entities/session.entity';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { CaslAbilityFactory } from './factory/casl-ability.factory';
+import { EmailModule } from 'src/email/email.module';
+import { WsJwtGuard } from './guards/ws-jwt.guard';
 
 
 @Module({
@@ -18,6 +20,7 @@ import { CaslAbilityFactory } from './factory/casl-ability.factory';
     TypeOrmModule.forFeature([Account, UserPermission, Session]),
     PassportModule,
     CacheModule.register(),
+    EmailModule,
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.MJ_JWT_SECRET || 'default-secret',
@@ -26,7 +29,7 @@ import { CaslAbilityFactory } from './factory/casl-ability.factory';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, CaslAbilityFactory],
-  exports: [AuthService, CaslAbilityFactory],
+  providers: [AuthService, JwtStrategy, CaslAbilityFactory, WsJwtGuard],
+  exports: [AuthService, CaslAbilityFactory, WsJwtGuard, JwtModule],
 })
 export class AuthModule {}

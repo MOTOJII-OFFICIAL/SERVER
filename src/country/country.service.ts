@@ -4,6 +4,8 @@ import { Repository, Brackets } from 'typeorm';
 import { Country } from './entities/country.entity';
 import { CountryDto, CountryPaginationDto } from './dto/create-country.dto';
 import { DefaultStatus } from 'src/enum';
+import { join } from 'path';
+import { unlink } from 'fs/promises';
 
 @Injectable()
 export class CountryService {
@@ -62,6 +64,28 @@ export class CountryService {
     const country = await this.findOne(id);
     Object.assign(country, dto);
     return this.repo.save(country);
+  }
+
+  async updateStatus(id: string, status: DefaultStatus) {
+    const country = await this.findOne(id);
+    country.status = status;
+    return this.repo.save(country);
+  }
+
+  async icon(image: string, result: Country) {
+    if (result.flagPath) {
+      const oldPath = join(__dirname, '..', '..', result.flagPath);
+      try {
+        await unlink(oldPath);
+      } catch (err) {
+        console.warn(`Failed to delete old image: ${oldPath}`, err.message);
+      }
+    }
+    const obj = Object.assign(result, {
+      icon: process.env.MJ_CDN_LINK + image,
+      iconPath: image,
+    });
+    return this.repo.save(obj);
   }
 
   async remove(id: string) {

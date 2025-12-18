@@ -4,6 +4,8 @@ import { Banner } from './entities/banner.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DefaultStatus } from 'src/enum';
+import { join } from 'path';
+import { unlink } from 'fs/promises';
 
 @Injectable()
 export class BannerService {
@@ -14,7 +16,7 @@ export class BannerService {
 
   async create(image: string, dto: BannerDto) {
     const obj = Object.assign({
-      image: process.env.mj_CDN_LINK + image,
+      image: process.env.MJ_CDN_LINK + image,
       imagePath: image,
       status: dto.status
     });
@@ -59,8 +61,16 @@ export class BannerService {
   }
 
   async image(image: string, result: Banner) {
+    if (result.imagePath) {
+      const oldPath = join(__dirname, '..', '..', result.imagePath);
+      try {
+        await unlink(oldPath);
+      } catch (err) {
+        console.warn(`Failed to delete old image: ${oldPath}`, err.message);
+      }
+    }
     const obj = Object.assign(result, {
-      image: process.env.RN_CDN_LINK + image,
+      image: process.env.MJ_CDN_LINK + image,
       imagePath: image,
     });
     return this.repo.save(obj);

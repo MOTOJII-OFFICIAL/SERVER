@@ -17,6 +17,12 @@ import { StateModule } from './state/state.module';
 import { CountryModule } from './country/country.module';
 import { AddressModule } from './address/address.module';
 import { UserAdditionalDetailsModule } from './user-additional-details/user-additional-details.module';
+import { EmailConfigModule } from './email-config/email-config.module';
+import { EmailModule } from './email/email.module';
+import { NotificationModule } from './notification/notification.module';
+import { VehicleModule } from './vehicle/vehicle.module';
+import { ServiceModule } from './service/service.module';
+import { ServiceCategoryModule } from './service-category/service-category.module';
 dotenv.config();
 
 @Module({
@@ -49,7 +55,13 @@ dotenv.config();
     StateModule,
     CountryModule,
     AddressModule,
-    UserAdditionalDetailsModule
+    UserAdditionalDetailsModule,
+    EmailConfigModule,
+    EmailModule,
+    NotificationModule,
+    VehicleModule,
+    ServiceModule,
+    ServiceCategoryModule
 
   ],
   controllers: [AppController],

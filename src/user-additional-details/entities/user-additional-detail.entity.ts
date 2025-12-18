@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { AppBaseEntity } from 'src/shared/entity/AppBaseEntity';
 import { Account } from 'src/account/entities/account.entity';
-import { UserRole } from 'src/enum';
+import { UserRole, WorkingStatus } from 'src/enum';
 
 @Entity()
 export class UserAdditionalDetail extends AppBaseEntity {
@@ -57,6 +57,17 @@ export class UserAdditionalDetail extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   licenceDoc: string;
 
-  @ManyToOne(() => Account)
+  // Service provider fields (for MECHANIC, VENDOR, TOWING_PROVIDER, CAR_DETAILER)
+  @Column({ type: 'enum', enum: WorkingStatus, nullable: true })
+  workingStatus: WorkingStatus;
+
+  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0.00 })
+  rating: number;
+
+  @ManyToOne(() => Account, (account) => account.userAdditionalDetails, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   account: Account;
 }

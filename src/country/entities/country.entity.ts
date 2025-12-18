@@ -10,6 +10,15 @@ export class Country extends AppBaseEntity {
   @Column({ type: 'varchar', length: 10, nullable: true })
   code: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  flagUrl: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  flagPath: string;
+
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  phoneCode: string;
+
   @OneToMany(() => State, (state) => state.country)
   states: State[];
 }

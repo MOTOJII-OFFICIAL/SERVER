@@ -34,3 +34,42 @@ export enum AddressType {
     WORK = 'WORK',
     OTHER = 'OTHER',
 }
+
+export enum VehicleCategory {
+    BIKE = 'BIKE',
+    CAR = 'CAR',
+}
+
+export enum CarType {
+    SEDAN = 'SEDAN',
+    HATCHBACK = 'HATCHBACK',
+    SUV = 'SUV',
+}
+
+export enum WorkingStatus {
+    AVAILABLE = 'AVAILABLE',
+    BUSY = 'BUSY',
+    OFFLINE = 'OFFLINE',
+}
+
+export enum RequestStatus {
+    PENDING = 'PENDING',
+    ACCEPTED = 'ACCEPTED',
+    IN_PROGRESS = 'IN_PROGRESS',
+    COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED',
+}
+
+export enum OrderStatus {
+    PENDING = 'PENDING',
+    CONFIRMED = 'CONFIRMED',
+    SHIPPED = 'SHIPPED',
+    DELIVERED = 'DELIVERED',
+    CANCELLED = 'CANCELLED',
+}
+
+export enum CouponType {
+    PERCENTAGE = 'PERCENTAGE',
+    FIXED_AMOUNT = 'FIXED_AMOUNT',
+    FREE_DELIVERY = 'FREE_DELIVERY',
+}

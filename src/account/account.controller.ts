@@ -11,22 +11,33 @@ import { Account } from './entities/account.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { UserRole } from 'src/enum';
+import { UserRole, WorkingStatus } from 'src/enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { IsEnum } from 'class-validator';
+
+class UpdateWorkingStatusDto {
+  @IsEnum(WorkingStatus)
+  workingStatus: WorkingStatus;
+}
 
 @Controller('account')
 @UseGuards(AuthGuard('jwt'))
 export class AccountController {
-  constructor(private readonly accountService: AccountService) {}
+  constructor(private readonly accountService: AccountService) { }
 
   @Post()
   create(@Body() createAccountDto: CreateAccountDto) {
     return this.accountService.create(createAccountDto);
   }
 
-  @Get('users')
+  @Post('address')
+  addAddress(@CurrentUser() user: Account, @Body() createAddressDto: CreateUserAddressDto) {
+    return this.accountService.addUserAddress(user.id, createAddressDto);
+  }
+
+  @Get('admin')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   getUsers(@Query() query: GetUsersQueryDto) {
@@ -48,11 +59,6 @@ export class AccountController {
   @Patch('profile')
   updateProfile(@CurrentUser() user: Account, @Body() updateProfileDto: UpdateProfileDto) {
     return this.accountService.updateProfile(user.id, updateProfileDto);
-  }
-
-  @Post('address')
-  addAddress(@CurrentUser() user: Account, @Body() createAddressDto: CreateUserAddressDto) {
-    return this.accountService.addUserAddress(user.id, createAddressDto);
   }
 
   @Put('update-image')
@@ -84,13 +90,6 @@ export class AccountController {
     return this.accountService.updateImage(user.id, file.path);
   }
 
-  @Delete(':id')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
-  deleteUser(@Param('id') id: string, @CurrentUser() user: Account) {
-    return this.accountService.deleteUser(id, user.id);
-  }
-
   @Patch('status/:id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -102,18 +101,6 @@ export class AccountController {
     return this.accountService.updateUserStatus(id, updateStatusDto, user.id);
   }
 
-  @Get()
-  @UseGuards(AuthGuard('jwt'))
-  findAll() {
-    return this.accountService.findAll();
-  }
-
-  @Get(':id')
-  @UseGuards(AuthGuard('jwt'))
-  findOne(@Param('id') id: string) {
-    return this.accountService.findOne(id);
-  }
-
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -121,7 +108,17 @@ export class AccountController {
     return this.accountService.update(id, updateAccountDto);
   }
 
-  @Delete('remove/:id')
+  @Patch('working-status')
+  updateWorkingStatus(@CurrentUser() user: Account, @Body() dto: UpdateWorkingStatusDto) {
+    return this.accountService.updateWorkingStatus(user.id, dto.workingStatus);
+  }
+
+  @Get('provider-stats')
+  getProviderStats(@CurrentUser() user: Account) {
+    return this.accountService.getProviderStats(user.id);
+  }
+
+  @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string) {
