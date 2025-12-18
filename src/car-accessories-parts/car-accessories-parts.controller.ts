@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Query, UseGuards, Request, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, Put } from '@nestjs/common';
 import { CarAccessoriesPartsService } from './car-accessories-parts.service';
-import { CreateCarAccessoriesPartsDto } from './dto/create-car-accessories-parts.dto';
+import { CreateCarAccessoriesPartsDto, QueryDto } from './dto/create-car-accessories-parts.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -9,6 +9,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { IsInt, Min } from 'class-validator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 class UpdateStockDto {
   @IsInt()
@@ -28,8 +29,8 @@ export class CarAccessoriesPartsController {
   }
 
   @Get()
-  findAll(@Query('categoryId') categoryId?: string) {
-    return this.partsService.findAll(categoryId);
+  findAll(@Query() paginationDto: QueryDto ) {
+    return this.partsService.findAll(paginationDto);
   }
 
   @Get('vendor/my-parts')
@@ -67,7 +68,7 @@ export class CarAccessoriesPartsController {
       }),
     }),
   )
-  uploadImage(
+  async uploadImage(
     @Request() req,
     @Param('id') id: string,
     @UploadedFile(
@@ -79,7 +80,8 @@ export class CarAccessoriesPartsController {
     )
     file: Express.Multer.File,
   ) {
-    return this.partsService.uploadImage(id, req.user.id, file.path);
+    const part = await this.partsService.findOne(id);
+    return this.partsService.uploadImage(file.path, part);
   }
 
   @Get('admin/pending')

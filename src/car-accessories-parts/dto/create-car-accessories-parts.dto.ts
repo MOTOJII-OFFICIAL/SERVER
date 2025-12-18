@@ -1,4 +1,5 @@
 import { IsString, IsNumber, IsOptional, IsUUID, IsInt, Min } from 'class-validator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 export class CreateCarAccessoriesPartsDto {
   @IsString()
@@ -30,4 +31,10 @@ export class CreateCarAccessoriesPartsDto {
 
   @IsUUID()
   categoryId: string;
+}
+
+export class QueryDto extends PaginationDto {
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 }

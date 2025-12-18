@@ -12,6 +12,7 @@ import { Session } from './entities/session.entity';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { CaslAbilityFactory } from './factory/casl-ability.factory';
 import { EmailModule } from 'src/email/email.module';
+import { OnboardingTrackingModule } from 'src/onboarding-tracking/onboarding-tracking.module';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 
 
@@ -21,6 +22,7 @@ import { WsJwtGuard } from './guards/ws-jwt.guard';
     PassportModule,
     CacheModule.register(),
     EmailModule,
+    OnboardingTrackingModule,
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.MJ_JWT_SECRET || 'default-secret',

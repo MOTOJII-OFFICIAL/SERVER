@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, Put, Query } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -8,6 +8,7 @@ import { UserRole } from 'src/enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('news')
 export class NewsController {
@@ -21,8 +22,8 @@ export class NewsController {
   }
 
   @Get()
-  findAll() {
-    return this.newsService.findAll();
+  findAll(@Query() paginationDto: PaginationDto = { limit: 10, offset: 0 }) {
+    return this.newsService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -47,7 +48,7 @@ export class NewsController {
       }),
     }),
   )
-  uploadPhoto(
+  async uploadPhoto(
     @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipe({
@@ -58,6 +59,7 @@ export class NewsController {
     )
     file: Express.Multer.File,
   ) {
-    return this.newsService.uploadPhoto(id, file.path);
+    const news = await this.newsService.findOne(id);
+    return this.newsService.uploadPhoto(file.path, news);
   }
 }

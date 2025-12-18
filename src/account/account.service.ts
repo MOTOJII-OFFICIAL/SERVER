@@ -60,6 +60,7 @@ export class AccountService {
         'account.phone',
         'account.userRole',
         'account.status',
+        'account.isVerified',
         'account.profileImg',
         'account.profileUrl',
         'account.createdAt',
@@ -102,6 +103,7 @@ export class AccountService {
       .leftJoin('addresses.country', 'country')
       .leftJoin('addresses.state', 'state')
       .leftJoin('addresses.city', 'city')
+      .leftJoin('account.onboardingTracking', 'onboarding')
       .select([
         'account.id',
         'account.name',
@@ -109,6 +111,7 @@ export class AccountService {
         'account.phone',
         'account.userRole',
         'account.status',
+        'account.isVerified',
         'account.profileImg',
         'account.profileUrl',
         'account.createdAt',
@@ -126,7 +129,9 @@ export class AccountService {
         'state.id',
         'state.name',
         'city.id',
-        'city.name'
+        'city.name',
+        'onboarding.onboardingStatus',
+        'onboarding.adminRemark'
       ])
       .where('account.id = :id', { id })
       .andWhere('account.status IN (:...statuses)', { 

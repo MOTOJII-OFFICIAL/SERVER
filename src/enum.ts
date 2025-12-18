@@ -73,3 +73,19 @@ export enum CouponType {
     FIXED_AMOUNT = 'FIXED_AMOUNT',
     FREE_DELIVERY = 'FREE_DELIVERY',
 }
+
+export enum OnboardingStatus {
+    DOCUMENT_PENDING = 'DOCUMENT_PENDING',
+    DOCUMENT_UPLOADED = 'DOCUMENT_UPLOADED',
+    UNDER_REVIEW = 'UNDER_REVIEW',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
+}
+
+export enum DocumentType {
+    AADHAR = 'AADHAR',
+    PAN = 'PAN',
+    GST = 'GST',
+    LICENCE = 'LICENCE',
+    SELFIE = 'SELFIE',
+}

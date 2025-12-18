@@ -7,7 +7,7 @@ import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Account } from 'src/account/entities/account.entity';
 import { NotificationGateway } from 'src/notification/notification.gateway';
-import { UserRole, WorkingStatus, RequestStatus } from 'src/enum';
+import { UserRole, WorkingStatus, RequestStatus, DefaultStatus } from 'src/enum';
 
 @Injectable()
 export class ServiceRequestService {
@@ -20,6 +20,12 @@ export class ServiceRequestService {
   ) {}
 
   async create(userId: string, createDto: CreateServiceRequestDto): Promise<ServiceRequest> {
+    // Check if provider is verified and active
+    const provider = await this.accountRepository.findOne({ where: { id: createDto.providerId } });
+    if (!provider || !provider.isVerified || provider.status !== DefaultStatus.ACTIVE) {
+      throw new Error('Provider must be verified and active to receive service requests');
+    }
+
     const entityData: Partial<ServiceRequest> = {
       userId,
       providerId: createDto.providerId,
@@ -55,6 +61,8 @@ export class ServiceRequestService {
       .where('account.userRole IN (:...roles)', {
         roles: userRole ? [userRole] : [UserRole.MECANIC, UserRole.VENDOR, UserRole.TOWING_PROVIDER, UserRole.CAR_DETAILER],
       })
+      .andWhere('account.isVerified = :isVerified', { isVerified: true })
+      .andWhere('account.status = :accountStatus', { accountStatus: DefaultStatus.ACTIVE })
       .andWhere('details.workingStatus = :status', { status: WorkingStatus.AVAILABLE })
       .andWhere('address.latitude IS NOT NULL AND address.longitude IS NOT NULL')
       .addSelect(
@@ -199,6 +207,12 @@ export class ServiceRequestService {
   }
 
   async acceptRequest(providerId: string, requestId: string): Promise<ServiceRequest | null> {
+    // Check if provider is verified and active
+    const provider = await this.accountRepository.findOne({ where: { id: providerId } });
+    if (!provider || !provider.isVerified || provider.status !== DefaultStatus.ACTIVE) {
+      throw new Error('Provider must be verified and active to accept requests');
+    }
+
     const request = await this.serviceRequestRepository.findOne({
       where: { id: requestId, providerId },
       relations: ['user'],
@@ -218,6 +232,12 @@ export class ServiceRequestService {
   }
 
   async rejectRequest(providerId: string, requestId: string): Promise<ServiceRequest | null> {
+    // Check if provider is verified and active
+    const provider = await this.accountRepository.findOne({ where: { id: providerId } });
+    if (!provider || !provider.isVerified || provider.status !== DefaultStatus.ACTIVE) {
+      throw new Error('Provider must be verified and active to reject requests');
+    }
+
     const request = await this.serviceRequestRepository.findOne({
       where: { id: requestId, providerId },
       relations: ['user'],

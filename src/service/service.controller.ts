@@ -9,6 +9,7 @@ import { extname } from 'path';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { PaginationServiceDto } from './dto/pagination-service.dto';
 
 @Controller('services')
 export class ServiceController {
@@ -24,8 +25,8 @@ export class ServiceController {
 
   // READ (Public)
   @Get()
-  findAll(@Query('categoryId') categoryId?: string) {
-    return this.serviceService.findAll(categoryId);
+  findAll(@Query('categoryId') categoryId?: string, @Query() paginationDto: PaginationServiceDto = { limit: 10, offset: 0 }) {
+    return this.serviceService.findAll(paginationDto, categoryId);
   }
 
   @Get(':id')
@@ -58,7 +59,7 @@ export class ServiceController {
       }),
     }),
   )
-  uploadIcon(
+  async uploadIcon(
     @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipe({
@@ -69,7 +70,8 @@ export class ServiceController {
     )
     file: Express.Multer.File,
   ) {
-    return this.serviceService.uploadIcon(id, file.path);
+    const service = await this.serviceService.findOne(id);
+    return this.serviceService.uploadIcon(file.path, service);
   }
 
   // Provider service management

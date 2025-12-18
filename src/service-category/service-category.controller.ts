@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, Put, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -9,6 +9,7 @@ import { extname } from 'path';
 import { ServiceCategoryService } from './service-category.service';
 import { CreateServiceCategoryDto } from './dto/create-service-category.dto';
 import { UpdateServiceCategoryDto } from './dto/update-service-category.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('service-categories')
 export class ServiceCategoryController {
@@ -24,8 +25,8 @@ export class ServiceCategoryController {
 
   // READ (Public)
   @Get()
-  findAll() {
-    return this.serviceCategoryService.findAll();
+  findAll(@Query() paginationDto: PaginationDto = { limit: 10, offset: 0 }) {
+    return this.serviceCategoryService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -58,7 +59,7 @@ export class ServiceCategoryController {
       }),
     }),
   )
-  uploadIcon(
+  async uploadIcon(
     @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipe({
@@ -69,7 +70,8 @@ export class ServiceCategoryController {
     )
     file: Express.Multer.File,
   ) {
-    return this.serviceCategoryService.uploadIcon(id, file.path);
+    const category = await this.serviceCategoryService.findOne(id);
+    return this.serviceCategoryService.uploadIcon(file.path, category);
   }
 
   // DELETE (Admin only)

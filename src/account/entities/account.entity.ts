@@ -14,6 +14,7 @@ import { PartsOrder } from "src/parts-order/entities/parts-order.entity";
 import { ProductRating } from "src/product-rating/entities/product-rating.entity";
 import { ContactUs } from "src/contact-us/entities/contact-us.entity";
 import { CouponUsage } from "src/coupons/entities/coupon-usage.entity";
+import { OnboardingTracking } from "src/onboarding-tracking/entities/onboarding-tracking.entity";
 import { Column, Entity, OneToMany } from "typeorm";
 
 @Entity()
@@ -35,6 +36,9 @@ export class Account extends AppBaseEntity {
 
     @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
     userRole: UserRole;
+
+    @Column({ type: 'boolean', default: false })
+    isVerified: boolean;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
     ip: string;
@@ -95,4 +99,7 @@ export class Account extends AppBaseEntity {
 
     @OneToMany(() => CouponUsage, (usage) => usage.user)
     couponUsages: CouponUsage[];
+
+    @OneToMany(() => OnboardingTracking, (onboarding) => onboarding.account)
+    onboardingTracking: OnboardingTracking[];
 }

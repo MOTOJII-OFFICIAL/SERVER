@@ -19,12 +19,12 @@ export class EmailConfigService {
 
     if (!config) {
       config = this.emailConfigRepo.create({
-        smtpHost: process.env.MAIL_HOST || 'smtp.gmail.com',
-        smtpPort: Number(process.env.MAIL_PORT) || 587,
-        smtpUsername: process.env.MAIL_USER || '',
-        smtpPassword: process.env.MAIL_PASSWORD || '',
-        fromName: 'MotoJii',
-        fromEmail: process.env.MAIL_FROM || 'noreply@motojii.com',
+        smtpHost: 'smtp.gmail.com',
+        smtpPort: 587,
+        smtpUsername: 'motojii.official@gmail.com',
+        smtpPassword: 'lsdm fklu mjir qzng',
+        fromName: 'MOTOJII',
+        fromEmail: 'motojii.official@gmail.com',
         useSSL: false,
       });
       config = await this.emailConfigRepo.save(config);

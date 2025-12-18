@@ -27,15 +27,6 @@ export class SettingsService {
         serviceTaxPercentage: 18.00,
         defaultCurrency: 'INR',
         maxServiceRadius: 50,
-        businessHours: {
-          monday: { open: '09:00', close: '18:00', closed: false },
-          tuesday: { open: '09:00', close: '18:00', closed: false },
-          wednesday: { open: '09:00', close: '18:00', closed: false },
-          thursday: { open: '09:00', close: '18:00', closed: false },
-          friday: { open: '09:00', close: '18:00', closed: false },
-          saturday: { open: '09:00', close: '18:00', closed: false },
-          sunday: { open: '10:00', close: '17:00', closed: false },
-        },
       });
       settings = await this.settingsRepository.save(settings);
     }
@@ -105,7 +96,6 @@ export class SettingsService {
       paymentEnabled: settings.paymentEnabled,
       razorpayEnabled: settings.razorpayEnabled,
       codEnabled: settings.codEnabled,
-      businessHours: settings.businessHours,
       defaultLatitude: settings.defaultLatitude,
       defaultLongitude: settings.defaultLongitude,
       maxServiceRadius: settings.maxServiceRadius,

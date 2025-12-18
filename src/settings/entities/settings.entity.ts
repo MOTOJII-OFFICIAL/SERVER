@@ -152,6 +152,31 @@ export class Settings extends AppBaseEntity {
   @Column({ default: true })
   codEnabled: boolean; // Cash on Delivery
 
+  // Email Configuration
+  @Column({ nullable: true })
+  emailProvider: string; // 'smtp', 'gmail', 'outlook'
+
+  @Column({ nullable: true })
+  emailHost: string;
+
+  @Column({ nullable: true })
+  emailPort: string;
+
+  @Column({ nullable: true })
+  emailUsername: string;
+
+  @Column({ nullable: true })
+  emailPassword: string;
+
+  @Column({ default: false })
+  emailSecure: boolean;
+
+  @Column({ nullable: true })
+  emailFromName: string;
+
+  @Column({ nullable: true })
+  emailFromAddress: string;
+
   // SMS Configuration
   @Column({ nullable: true })
   smsProvider: string; // 'twilio', 'aws-sns', 'textlocal'

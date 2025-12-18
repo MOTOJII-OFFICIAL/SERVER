@@ -16,6 +16,7 @@ import { UserRole, OtpType } from 'src/enum';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from 'src/email/email.service';
+import { OnboardingTrackingService } from 'src/onboarding-tracking/onboarding-tracking.service';
 
 @Injectable()
 export class AuthService {
@@ -26,13 +27,14 @@ export class AuthService {
     @InjectRepository(Session) private readonly sessionRepo: Repository<Session>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private emailService: EmailService,
+    private onboardingService: OnboardingTrackingService,
   ) { }
 
   async sendAdminOtp(loginId: string) {
     const admin = await this.findUserByLoginId(loginId, UserRole.ADMIN);
     const otp = this.generateOtp();
 
-    await this.cacheManager.set(`admin_otp_${admin.id}`, otp, 15 * 60 * 1000);
+    await this.cacheManager.set(`admin_otp_${admin.id}`, otp, 10 * 60 * 1000);
     await this.cacheManager.del(`admin_otp_attempts_${admin.id}`);
     
     await this.emailService.sendOTP(admin.email, otp, OtpType.ADMIN);
@@ -67,7 +69,7 @@ export class AuthService {
     const user = await this.findUserByLoginId(loginId);
     const otp = this.generateOtp();
 
-    await this.cacheManager.set(`user_otp_${user.id}`, otp, 15 * 60 * 1000);
+    await this.cacheManager.set(`user_otp_${user.id}`, otp, 10 * 60 * 1000);
     await this.cacheManager.del(`user_otp_attempts_${user.id}`);
     
     await this.emailService.sendOTP(user.email, otp, OtpType.USER);
@@ -102,7 +104,7 @@ export class AuthService {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
-  async register(email: string, phoneNumber: string, name: string, password: string) {
+  async register(email: string, phoneNumber: string, name: string, password: string, userRole: UserRole = UserRole.USER) {
     const existingUser = await this.repo.findOne({
       where: [{ email }, { phone: phoneNumber }]
     });
@@ -113,7 +115,7 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const otp = this.generateOtp();
-    await this.cacheManager.set(`register_otp_${email}`, { otp, email, phoneNumber, name, password: hashedPassword }, 15 * 60 * 1000);
+    await this.cacheManager.set(`register_otp_${email}`, { otp, email, phoneNumber, name, password: hashedPassword, userRole }, 10 * 60 * 1000);
     
     await this.emailService.sendOTP(email, otp, OtpType.REGISTER);
 
@@ -135,15 +137,25 @@ export class AuthService {
       throw new BadRequestException(`Invalid OTP. ${2 - attempts} attempts remaining.`);
     }
 
+    const isServiceProvider = [UserRole.MECANIC, UserRole.VENDOR, UserRole.TOWING_PROVIDER, UserRole.CAR_DETAILER].includes(cachedData.userRole);
+    
     const user = this.repo.create({
       email: cachedData.email,
       phone: cachedData.phoneNumber,
       name: cachedData.name,
       password: cachedData.password,
-      userRole: UserRole.USER
+      userRole: cachedData.userRole,
+      isVerified: !isServiceProvider
     });
 
     await this.repo.save(user);
+    
+    if (isServiceProvider) {
+      await this.onboardingService.createOnboardingRecord(user.id, cachedData.userRole);
+    }
+    
+    await this.emailService.sendWelcomeEmail(user.email, user.name, cachedData.userRole);
+    
     await this.cacheManager.del(`register_otp_${loginId}`);
     await this.cacheManager.del(attemptKey);
 
@@ -172,9 +184,9 @@ export class AuthService {
 
     if (type === OtpType.REGISTER) {
       const existingData = await this.cacheManager.get<any>(`register_otp_${loginId}`);
-      await this.cacheManager.set(cacheKey, { ...existingData, otp }, 15 * 60 * 1000);
+      await this.cacheManager.set(cacheKey, { ...existingData, otp }, 10 * 60 * 1000);
     } else {
-      await this.cacheManager.set(cacheKey, otp, 15 * 60 * 1000);
+      await this.cacheManager.set(cacheKey, otp, 10 * 60 * 1000);
     }
 
     await this.emailService.sendOTP(emailToSend, otp, type);
@@ -273,6 +285,16 @@ export class AuthService {
 
   private async findUserByLoginId(loginId: string, role?: UserRole): Promise<Account> {
     const query = this.repo.createQueryBuilder('account')
+      .select([
+        'account.id',
+        'account.name',
+        'account.email',
+        'account.phone',
+        'account.userRole',
+        'account.status',
+        'account.isVerified',
+        'account.password'
+      ])
       .where('account.email = :loginId OR account.phone = :loginId', { loginId });
 
     if (role) {

@@ -8,7 +8,7 @@ import { Account } from 'src/account/entities/account.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { PaginationServiceDto } from './dto/pagination-service.dto';
-import { UserRole } from 'src/enum';
+import { UserRole, DefaultStatus } from 'src/enum';
 import { join } from 'path';
 import { unlink } from 'fs/promises';
 
@@ -87,7 +87,9 @@ export class ServiceService {
         'carType.id',
         'carType.name'
       ])
-      .where('service.status = :status', { status: 'ACTIVE' });
+      .where('service.status = :status', { status: 'ACTIVE' })
+      .andWhere('provider.isVerified = :isVerified', { isVerified: true })
+      .andWhere('provider.status = :providerStatus', { providerStatus: DefaultStatus.ACTIVE });
 
     if (providerId) {
       query.andWhere('service.providerId = :providerId', { providerId });
@@ -117,6 +119,10 @@ export class ServiceService {
     const provider = await this.accountRepository.findOne({ where: { id: providerId } });
     if (!provider) {
       throw new NotFoundException('Provider not found');
+    }
+
+    if (!provider.isVerified || provider.status !== DefaultStatus.ACTIVE) {
+      throw new BadRequestException('Account must be verified and active to create services');
     }
 
     const validRoles = [UserRole.MECANIC, UserRole.TOWING_PROVIDER, UserRole.CAR_DETAILER, UserRole.VENDOR];

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Brackets } from 'typeorm';
 import { CarAccessoriesParts } from './entities/car-accessories-parts.entity';
-import { CreateCarAccessoriesPartsDto } from './dto/create-car-accessories-parts.dto';
+import { CreateCarAccessoriesPartsDto, QueryDto } from './dto/create-car-accessories-parts.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Account } from 'src/account/entities/account.entity';
 import { UserRole, DefaultStatus } from 'src/enum';
@@ -37,7 +37,7 @@ export class CarAccessoriesPartsService {
     return this.partsRepository.save(part);
   }
 
-  async findAll(paginationDto: PaginationDto, categoryId?: string) {
+  async findAll(paginationDto: QueryDto) {
     const query = this.partsRepository
       .createQueryBuilder('part')
       .leftJoin('part.category', 'category')
@@ -59,8 +59,8 @@ export class CarAccessoriesPartsService {
       .where('part.stockQuantity > 0')
       .andWhere('part.status = :status', { status: DefaultStatus.ACTIVE });
 
-    if (categoryId) {
-      query.andWhere('part.categoryId = :categoryId', { categoryId });
+    if (paginationDto.categoryId) {
+      query.andWhere('part.categoryId = :categoryId', { categoryId: paginationDto.categoryId });
     }
 
     if (paginationDto.keyword) {
@@ -137,6 +137,14 @@ export class CarAccessoriesPartsService {
     part.stockQuantity = stockQuantity;
     part.updatedBy = vendorId;
     return this.partsRepository.save(part);
+  }
+
+  async findOne(id: string) {
+    const part = await this.partsRepository.findOne({ where: { id } });
+    if (!part) {
+      throw new NotFoundException('Part not found');
+    }
+    return part;
   }
 
   async uploadImage(imagePath: string, part: CarAccessoriesParts) {

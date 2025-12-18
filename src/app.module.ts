@@ -23,6 +23,7 @@ import { NotificationModule } from './notification/notification.module';
 import { VehicleModule } from './vehicle/vehicle.module';
 import { ServiceModule } from './service/service.module';
 import { ServiceCategoryModule } from './service-category/service-category.module';
+import { OnboardingTrackingModule } from './onboarding-tracking/onboarding-tracking.module';
 dotenv.config();
 
 @Module({
@@ -61,7 +62,8 @@ dotenv.config();
     NotificationModule,
     VehicleModule,
     ServiceModule,
-    ServiceCategoryModule
+    ServiceCategoryModule,
+    OnboardingTrackingModule
 
   ],
   controllers: [AppController],

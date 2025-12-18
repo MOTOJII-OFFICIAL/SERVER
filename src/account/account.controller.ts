@@ -87,7 +87,7 @@ export class AccountController {
     )
     file: Express.Multer.File,
   ) {
-    return this.accountService.updateImage(user.id, file.path);
+    return this.accountService.updateImage(file.path, user);
   }
 
   @Patch('status/:id')
